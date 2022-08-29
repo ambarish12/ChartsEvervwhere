@@ -9,9 +9,13 @@ import BarChart from './charts/BarChart';
 function App() {
   const [eq_data, setEqData] = useState([]);
   const [data, setData] = useState([]);
+  const [title, setTitle] = useState("");
+  const [yAxisLabel, setYLabel] = useState("");
   const flds = ["eqMagnitude", "deaths", "eqDepth"];
   const [fieldToMap, setField] = useState(flds[0]);
-
+  const labelDict = {
+    'eqMagnitude': 'Magnitude','eqDepth': 'Depth in km', 'deaths': 'Deaths in thousands'
+  }
   useEffect(() => {
     const getData = async () => {
       const dataFromServer = await fetchData();
@@ -26,7 +30,7 @@ function App() {
   }, [eq_data, fieldToMap]);
 
   const changeData = () => {
-    const data = eq_data.sort((a, b) => {
+    const data = eq_data.filter(d => d[fieldToMap]).sort((a, b) => {
       return b[fieldToMap] - a[fieldToMap];
     }).filter((d, index) => index < 10);
     setData(data.map(d => {
@@ -35,6 +39,8 @@ function App() {
         y: d[fieldToMap]
       }
     }));
+    setTitle(`Top 10 earthquakes by ${fieldToMap}`);
+    setYLabel(labelDict[fieldToMap]);
   }
 
   const handleChange = (event) => {
@@ -66,7 +72,7 @@ function App() {
             {flds.map((d, index) => <MenuItem key={index} value={d}>{d}</MenuItem>)}
           </Select>
         </FormControl>
-        {data.length > 0 && <BarChart width1={600} height1={400} data={data} />}
+        {data.length > 0 && <BarChart width1={600} height1={400} data={data} title={title} yAxisLabel={yAxisLabel} />}
       </div>
     </div>
   );
